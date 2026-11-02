@@ -1,0 +1,42 @@
+schemaVersion: v0.5
+prepare:
+  steps: []
+test:
+  steps: []
+run:
+  container:
+    healthEndpoint: http://localhost:9000/
+    plan: 101
+    replicas: 1
+    network:
+      ports:
+        - 3000
+        - 9000
+    env:
+      DB_ENGINE: postgres
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_SERVER: mealie-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: app
+    runAsUser: 1501
+    runAsGroup: 1010
+    volumeMounts:
+      - name: _workspace
+        mountPath: /home/user/app
+        workspacePath: asdf
+      - name: _workspace
+        mountPath: /app/data
+        workspacePath: persistent
+    image: ghcr.io/mealie-recipes/mealie:v3.14.0
+  cs-router:
+    type: router
+    plan: 101
+    replicaCount: 1
+    network:
+      isLandscapeGateway: true
+      paths:
+        - path: /nk
+          stripPath: false
+          service: container
+          port: 9000

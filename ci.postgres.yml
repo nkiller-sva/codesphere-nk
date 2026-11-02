@@ -1,0 +1,63 @@
+schemaVersion: v0.5
+prepare:
+  steps: []
+test:
+  steps: []
+run:
+  container:
+    healthEndpoint: tcp://localhost:3000
+    plan: 101
+    replicas: 1
+    network:
+      ports:
+        - 3000
+    env:
+      USER_UID: 1501
+      USER_GID: 1010
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: ms-postgres-v1-191-landscape-689709-postgres.rg-191:5432
+      GITEA__database__NAME: app
+      GITEA__database__USER: app
+      GITEA__database__PASSWD: app
+      GITEA__server__ROOT_URL: https://courses.codesphere-demo.com/nk/
+    runAsUser: 1501
+    runAsGroup: 1010
+    volumeMounts:
+      - name: _workspace
+        mountPath: /var/lib/gitea
+        workspacePath: data-gitea2
+      - name: _workspace
+        mountPath: /home/user/app
+        workspacePath: test123
+      - name: _workspace
+        mountPath: /etc/gitea
+        workspacePath: config2
+    image: docker.gitea.com/gitea:28.3.0-rootless
+  postgres:
+    provider:
+      name: postgres
+      schemaVersion: v1
+    plan:
+      id: 0
+      parameters:
+        cpu: 5
+        memory: 512
+        instances: 1
+    config:
+      version: "17.9"
+      userName: app
+      databaseName: app
+    secrets:
+      userPassword: app
+      superuserPassword: app
+  cs-router:
+    type: router
+    plan: 101
+    replicaCount: 1
+    network:
+      isLandscapeGateway: true
+      paths:
+        - path: /nk
+          stripPath: true
+          service: container
+          port: 3000

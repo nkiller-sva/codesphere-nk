@@ -1,0 +1,8 @@
+data:
+  db:
+    dialect: postgres
+    host: ${DB_HOST}
+    port: 5432
+    database: ${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
